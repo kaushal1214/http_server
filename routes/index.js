@@ -1,6 +1,20 @@
 var express = require('express');
 var router = express.Router();
 var auth = require('../middlewares/auth')
+const multer = require('multer')
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './public/images')
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now()
+    cb(null, "cdacDIOT" + '-' + uniqueSuffix + "." +(file.mimetype).split('/')[1])
+  }
+})
+
+const upload = multer({ storage: storage })
+
+
 
 let DB = [];
 
@@ -18,6 +32,20 @@ router.get('/', auth.authenticate, function(req, res, next) {
   res.render('index', { title: 'CDAC IoT Protocols' });
 });
 
+router.post('/upload/image', upload.single('photo'), function (req, res, next) {
+  // req.file is the `avatar` file
+  // req.body will hold the text fields, if there were any
+  console.log("Upload image request")
+    const image = req.file;
+    console.log(image)
+    res.json({message: 'Image file received. details', id: image.filename});
+})
+
+router.get('/image/:id',(req,res)=>{
+  res.setHeader("content-type","")
+  res.sendFile(req.params.id,{root:"./public/images"});
+})
+
 // GET request with JSON object
 router.get('/json',(req,res)=>{
   res.status(200).json({sensor:'temp', value: '24.5', unit:'F'})
@@ -27,7 +55,7 @@ router.get('/json',(req,res)=>{
 router.get('/delay',(req,res)=>{
   setTimeout(()=>{
     res.status(200).json({message:'Sorry I was late, too much traffic!'})
-  },5000);
+  },6000);
 })
 
 router.post('/sensor/value',(req,res)=>{
