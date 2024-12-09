@@ -23,6 +23,13 @@ router.get('/json',(req,res)=>{
   res.status(200).json({sensor:'temp', value: '24.5', unit:'F'})
 })
 
+// GET Delayed Response
+router.get('/delay',(req,res)=>{
+  setTimeout(()=>{
+    res.status(200).json({message:'Sorry I was late, too much traffic!'})
+  },5000);
+})
+
 router.post('/sensor/value',(req,res)=>{
   DB.push(req.body);
   res.status(201).json({message:"Resource inserted"});
